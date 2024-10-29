@@ -1,0 +1,23 @@
+﻿<Window x:Class="MEP_Tools.AutoCutWall.MainView_ArcNew"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MEP_Tools"
+             mc:Ignorable="d" 
+             Name ="MainWPF"
+             Title="Handle Collision"
+             Height="210" Width="255"
+             Loaded="MainWPF_Loaded"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Button Content="Pick Walls" HorizontalAlignment="Left" Height="25" Margin="10,140,0,0" VerticalAlignment="Top" Width="80" Click="Button_Click" 
+                    Command ="{Binding CommandOK}"
+                    CommandParameter="{Binding ElementName=MainWPF}"/>
+        <Button Content="Cancel" HorizontalAlignment="Left" Height="25" Margin="180,140,0,0" VerticalAlignment="Top" Width="50"
+                    Command ="{Binding CommandCancel}"
+                    CommandParameter="{Binding ElementName=MainWPF}"/>
+        <ListBox x:Name="list_Link" HorizontalAlignment="Left" Height="115" Margin="10,10,0,0" VerticalAlignment="Top" Width="220" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible"/>
+
+    </Grid>
+</Window>

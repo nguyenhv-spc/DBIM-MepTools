@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Text>Command MEP_Tools</Text>
+    <Description>Some description for MEP_Tools</Description>
+    <Assembly>MEP_Tools.dll</Assembly>
+    <FullClassName>MEP_Tools.Command</FullClassName>
+    <ClientId>f6f41b2e-bec1-4f57-a90f-6c01d0feaa32</ClientId>
+    <VendorId>HVN-0398012200</VendorId>
+    <VendorDescription>HVN, https://facebook.com/hoangvan.nguyen.94043 </VendorDescription>
+  </AddIn>
+  <AddIn Type="Application">
+    <Name>Application MEP_Tools</Name>
+    <Assembly>MEP_Tools.dll</Assembly>
+    <FullClassName>MEP_Tools.App</FullClassName>
+    <ClientId>e563708c-be8d-4f26-838e-c7e708395595</ClientId>
+    <VendorId>HVN-0398012200</VendorId>
+    <VendorDescription>HVN, https://facebook.com/hoangvan.nguyen.94043 </VendorDescription>
+  </AddIn>
+</RevitAddIns>

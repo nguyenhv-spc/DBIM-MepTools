@@ -1,0 +1,36 @@
+﻿<Window x:Class="MEP_Tools.SplitPipe.MainView_SP"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MEP_Tools.SplitPipe"
+             mc:Ignorable="d" 
+             Name ="MainWPF_SP" 
+             ResizeMode="NoResize" 
+             Title="Auto Split"
+             Height="180"
+             Width="320"
+        Loaded="MainWPF_SP_Loaded">
+    <Grid>
+        <Button Content="Pick" HorizontalAlignment="Left" Height="25" Margin="155,105,0,0" VerticalAlignment="Top" Width="60"
+                Command ="{Binding OKCommand}"
+                CommandParameter="{Binding ElementName=MainWPF_SP}"
+                Click="Button_Click"/>
+        <Button Content="Cancel" HorizontalAlignment="Left" Height="25" Margin="224,105,0,0" VerticalAlignment="Top" Width="70"
+                Command ="{Binding CloseCommand}"
+                CommandParameter="{Binding ElementName=MainWPF_SP}"/>
+        <Label Content="Distance From Edge" HorizontalAlignment="Left" Height="30" Width="150" Margin="10,10,0,0" VerticalAlignment="Top" />
+        <TextBox x:Name="DFS" HorizontalAlignment="Left" Height="25" Margin="155,10,0,0" TextWrapping="Wrap" Text="4000" VerticalAlignment="Top" Width="100" VerticalContentAlignment="Center" />
+        <Label Content="(mm)" HorizontalAlignment="Left" Height="25" Width="45" Margin="255,10,0,0" VerticalAlignment="Top" />
+        <Label Content="Distance Between Unions" HorizontalAlignment="Left" Height="25" Width="150" Margin="10,70,0,0" VerticalAlignment="Top" />
+        <TextBox x:Name="DTU" HorizontalAlignment="Left" Height="25" Margin="155,70,0,0" TextWrapping="Wrap" Text="4000" VerticalAlignment="Top" Width="100" VerticalContentAlignment="Center" />
+        <Label Content="(mm)" HorizontalAlignment="Left" Height="25" Width="45" Margin="255,70,0,0" VerticalAlignment="Top" />
+        <RadioButton x:Name="FS" IsChecked="True" GroupName="StartPoint" Content="From Start" HorizontalAlignment="Left" Margin="10,45,0,0" VerticalAlignment="Top"/>
+        <RadioButton x:Name="FE" Content="From End" GroupName="StartPoint" HorizontalAlignment="Left" Margin="100,45,0,0" VerticalAlignment="Top"/>
+        <Button Content="?" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="20" Margin="10,107,0,0" VerticalAlignment="Top" Width="20" Click="Button_Click_1" MouseMove="Button_MouseMove">
+            <Button.ToolTip>
+                <ToolTip Content="Help"/>
+            </Button.ToolTip>
+        </Button>
+    </Grid>
+</Window>

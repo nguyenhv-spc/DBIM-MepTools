@@ -1,0 +1,39 @@
+﻿<Window
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MEP_Tools.Register"
+             x:Class="MEP_Tools.Register.MainView_Register"
+             mc:Ignorable="d" 
+             x:Name ="MainWPF" 
+             ResizeMode="NoResize"     
+             Height="180"
+             Width="525"
+             Title="Login"
+             Loaded="MainWPF_Loaded">
+    <Grid>
+        <Image HorizontalAlignment="Left" Height="115" Margin="10,10,0,0" VerticalAlignment="Top" Width="200" Source="C:\ProgramData\Autodesk\Revit\Addins\2023\DBIM Tools\Images\Logo_DBIM.jpg"/>
+        <TextBox x:Name="Username" HorizontalAlignment="Left" Height="25" Margin="288,10,0,0" Text="" VerticalAlignment="Top" Width="190" VerticalContentAlignment="Center"/>
+        <PasswordBox x:Name="Password" HorizontalAlignment="Left" Height="25" Margin="288,38,0,0" VerticalAlignment="Top" Width="190" VerticalContentAlignment="Center" KeyDown="btn_Login_KeyDown"/>
+        <Label Content="Email:" HorizontalAlignment="Left" Height="25" Width="40" Margin="228,10,0,0" VerticalAlignment="Top"/>
+        <Label Content="Password:" HorizontalAlignment="Left" Height="25" Width="66" Margin="228,38,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btn_Login" Content="Login" HorizontalAlignment="Left" Height="25" Margin="288,68,0,0" VerticalAlignment="Top" Width="60"
+                CommandParameter="{Binding ElementName=MainWPF}"
+                Click="btn_Login_Click"/>
+        <Button x:Name="btn_ForgetPass" Content="Forget password" HorizontalAlignment="Left" Height="25" Margin="358,68,0,0" VerticalAlignment="Top" Width="120"
+                CommandParameter="{Binding ElementName=MainWPF}"
+                Click="btn_ForgetPass_Click"/>
+        <Button x:Name="btn_Register" Content="Register now !!" FontStyle="Italic" HorizontalAlignment="Left" Height="25" Margin="288,98,0,0" VerticalAlignment="Top" Width="120"
+                CommandParameter="{Binding ElementName=MainWPF}"
+                Click="btn_Register_Click"/>
+        <Button x:Name="btn_Close" Content="Cancel" HorizontalAlignment="Left" Height="25" Margin="418,98,0,0" VerticalAlignment="Top" Width="60"
+                Command="{Binding Cancel}"
+            CommandParameter="{Binding ElementName=MainWPF}"/>
+        <Button Content="?"  HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Left" Height="20" Margin="483,10,0,0" VerticalAlignment="Top" Width="20" Click="Button_Click" MouseMove="Button_MouseMove">
+            <Button.ToolTip>
+                <ToolTip Content="Help"/>
+            </Button.ToolTip>
+        </Button>
+    </Grid>
+</Window>
