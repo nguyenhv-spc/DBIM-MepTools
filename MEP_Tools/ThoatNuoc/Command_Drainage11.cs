@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Input;
+using System.Windows.Interop;
 using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
@@ -16,10 +17,18 @@ namespace MEP_Tools.ThoatNuoc
     [Transaction(TransactionMode.Manual)]
     public class Command_Drainage11 : WPFData, IExternalCommand
     {
+        Document _doc;
+        Transaction ts = null;
+        TransactionGroup tsg = null;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             SingleData.Singleton.Instance = new SingleData.Singleton();
             SingleData.Singleton.Instance.RevitData.UIApplication = commandData.Application;
+
+            tsg = SingleData.Singleton.Instance.RevitData.TransactionGroup;
+            ts = SingleData.Singleton.Instance.RevitData.Transaction;
+            _doc = SingleData.Singleton.Instance.RevitData.Document;
+
             if (cls_Reg.Login == "Login")
             {
                 Run();
@@ -44,9 +53,10 @@ namespace MEP_Tools.ThoatNuoc
                         r_chinh = SingleData.Singleton.Instance.RevitData.Selection.PickObject(ObjectType.Element, "Please choose main pipe");
                         try
                         {
+                            tsg.Start(" MepTools ");
                             if (r_chinh != null)
                             {
-                                SingleData.Singleton.Instance.RevitData.Transaction.Start();
+                                ts.Start();
                                 Pipe pipe_chinh = SingleData.Singleton.Instance.RevitData.Document.GetElement(r_chinh) as Pipe;
                                 Pipe pipe_nhanh = SingleData.Singleton.Instance.RevitData.Document.GetElement(r_nhanh) as Pipe;
                                 Connector Conn_Bottom = F.GetConnector(pipe_nhanh);
@@ -91,21 +101,20 @@ namespace MEP_Tools.ThoatNuoc
                                     double len = p_new.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble();
                                     F.Case11(pipe_chinh, pipe_nhanh, stPoint, edPoint, Intersec, len, _pipeSystemType, _pipeType.Id, _levelId, p_new, F.GetConnectorFromPoint(p_new, Intersec), Conn_Bottom);
                                 }
-
-                                SingleData.Singleton.Instance.RevitData.Transaction.Commit();
+                                ts.Commit();
                             }
                             if (cls_ThoatNuoc.Id_Tee11 != null)
                             {
-
-                                    SingleData.Singleton.Instance.RevitData.Transaction.Start();
-                                    ElementTransformUtils.MoveElement(SingleData.Singleton.Instance.RevitData.Document, cls_ThoatNuoc.Id_Tee11, new XYZ(0.001 / 304.8, 0.001 / 304.8, 0));
-                                    SingleData.Singleton.Instance.RevitData.Transaction.Commit();
+                                ts.Start();
+                                ElementTransformUtils.MoveElement(SingleData.Singleton.Instance.RevitData.Document, cls_ThoatNuoc.Id_Tee11, new XYZ(0.001 / 304.8, 0.001 / 304.8, 0));
+                                ts.Commit();
                             }
-
+                            tsg.Assimilate();
                         }
                         catch (Exception ex)
                         {
-                            SingleData.Singleton.Instance.RevitData.Transaction.RollBack();
+                            if (ts.HasStarted()) ts.RollBack();
+                            if (tsg.HasStarted()) tsg.RollBack();
                             System.Windows.MessageBox.Show(ex.Message + "\n" + "Contact: " + cls_Contact.sdt + " or Email: " + cls_Contact.email);
                             return;
                         }

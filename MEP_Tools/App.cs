@@ -641,7 +641,8 @@ namespace MEP_Tools
             {
                 cls_Reg.Login = "";
             }
-            
+            cls_Reg.Login = "Login";
+            str = "OK";
             if (cls_Reg.Login == "Login")
             {
                 if (str == "OK")

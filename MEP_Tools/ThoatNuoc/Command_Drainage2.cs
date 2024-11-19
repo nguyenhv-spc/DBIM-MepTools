@@ -16,10 +16,18 @@ namespace MEP_Tools.ThoatNuoc
     [Transaction(TransactionMode.Manual)]
     public class Command_Drainage2 : WPFData, IExternalCommand
     {
+        Document _doc;
+        Transaction ts = null;
+        TransactionGroup tsg = null;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             SingleData.Singleton.Instance = new SingleData.Singleton();
             SingleData.Singleton.Instance.RevitData.UIApplication = commandData.Application;
+
+            tsg = SingleData.Singleton.Instance.RevitData.TransactionGroup;
+            ts = SingleData.Singleton.Instance.RevitData.Transaction;
+            _doc = SingleData.Singleton.Instance.RevitData.Document;
+
             if (cls_Reg.Login == "Login")
             {
                 if (cls_Reg.value_slope != "")
@@ -30,9 +38,7 @@ namespace MEP_Tools.ThoatNuoc
                 else
                 {
                     System.Windows.Forms.MessageBox.Show("Please enter slope value !");
-                }
-                
-                //SingleData.Singleton.Instance.WFData.InputWindow_ThoatNuoc.ShowDialog();
+                }           
             }
             return Result.Succeeded;
         }
@@ -53,7 +59,8 @@ namespace MEP_Tools.ThoatNuoc
                         {
                             try
                             {
-                                SingleData.Singleton.Instance.RevitData.Transaction.Start();
+                                tsg.Start(" MepTools ");
+                                ts.Start();
                                 Func_ThoatNuoc F = new Func_ThoatNuoc();
                                 #region 'Get Value'
                                 Element e = SingleData.Singleton.Instance.RevitData.Document.GetElement(r_nhanh);
@@ -88,19 +95,20 @@ namespace MEP_Tools.ThoatNuoc
                                         F.CopyParameters(p0, p_nhanh);
                                         SingleData.Singleton.Instance.RevitData.Document.Create.NewElbowFitting(ConnectorPipe0, F.GetConnectorFromPoint(p_nhanh, ConnectorPipe0.Origin));
                                     }
-                                }                             
+                                }
+                                #endregion
+
                                 ElementId _levelId_nhanh = p_nhanh.ReferenceLevel.Id;
                                 PipeType _pipeType_nhanh = p_nhanh.PipeType;
                                 ElementId _pipeSystemType_nhanh = p_nhanh.get_Parameter(BuiltInParameter.RBS_PIPING_SYSTEM_TYPE_PARAM).AsElementId();
-
-                                Connector Conn_Origin = F.GetConnector(p_nhanh);
-
-                                
-                                #endregion
-                                #region 'Get Distance and point'
+                                Connector Conn_Origin = F.GetConnector(p_nhanh);                        
                                 XYZ Intersec = F.CheckIntersec(stPoint, edPoint, F.GetIntersec1(stPoint, edPoint, Conn_Origin, p_nhanh));
+                                ts.Commit();
+
                                 if (Intersec != null)
                                 {
+                                    ts.Start();
+                                    #region 'Get Distance and point'
                                     XYZ diem1 = new XYZ(Intersec.X, Intersec.Y, 0);
                                     XYZ diem2 = new XYZ(Conn_Origin.Origin.X, Conn_Origin.Origin.Y, 0);
                                     double kc = diem1.DistanceTo(diem2);
@@ -112,19 +120,20 @@ namespace MEP_Tools.ThoatNuoc
                                     double len = p_new.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble();
                                     F.Case2(p_chinh, stPoint, edPoint, Intersec, len, _pipeSystemType, _pipeType.Id, _levelId, p_new, F.GetConnectorFromPoint(p_new, Intersec), Conn_Origin);
                                     #endregion
-                                    SingleData.Singleton.Instance.RevitData.Transaction.Commit();
+                                    ts.Commit();
                                     if (cls_ThoatNuoc.Id_Tee2 != null)
                                     {
-                                        SingleData.Singleton.Instance.RevitData.Transaction.Start();
+                                        ts.Start();
                                         ElementTransformUtils.MoveElement(SingleData.Singleton.Instance.RevitData.Document, cls_ThoatNuoc.Id_Tee2, new XYZ(0.001 / 304.8, 0.001 / 304.8, 0));
-                                        
+                                        ts.Commit();
                                     }
                                 }
-                                SingleData.Singleton.Instance.RevitData.Transaction.Commit();
+                                tsg.Assimilate();
                             }
                             catch (Exception ex)
                             {
-                                SingleData.Singleton.Instance.RevitData.Transaction.RollBack();
+                                if (ts.HasStarted()) ts.RollBack();
+                                if (tsg.HasStarted()) tsg.RollBack();
                                 System.Windows.MessageBox.Show(ex.Message + "\n" + "Contact: " + cls_Contact.sdt + " or Email: " + cls_Contact.email);
                                 return;
                             }

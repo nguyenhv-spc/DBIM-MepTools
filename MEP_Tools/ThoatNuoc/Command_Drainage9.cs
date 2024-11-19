@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Input;
+using System.Windows.Interop;
 using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
@@ -16,10 +17,18 @@ namespace MEP_Tools.ThoatNuoc
     [Transaction(TransactionMode.Manual)]
     public class Command_Drainage9 : WPFData, IExternalCommand
     {
+        Document _doc;
+        Transaction ts = null;
+        TransactionGroup tsg = null;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             SingleData.Singleton.Instance = new SingleData.Singleton();
             SingleData.Singleton.Instance.RevitData.UIApplication = commandData.Application;
+
+            tsg = SingleData.Singleton.Instance.RevitData.TransactionGroup;
+            ts = SingleData.Singleton.Instance.RevitData.Transaction;
+            _doc = SingleData.Singleton.Instance.RevitData.Document;
+
             if (cls_Reg.Login == "Login")
             {
                 if (cls_Reg.value_slope != "")
@@ -54,8 +63,9 @@ namespace MEP_Tools.ThoatNuoc
                         {
                             if (r_chinh != null)
                             {
+                                tsg.Start(" MepTools ");
 
-                                SingleData.Singleton.Instance.RevitData.Transaction.Start();
+                                ts.Start();
                                 Pipe pipe_nhanh = SingleData.Singleton.Instance.RevitData.Document.GetElement(r_nhanh) as Pipe;
                                 Connector Conn_Bottom_Nhanh =  F.GetConnector(pipe_nhanh);
 
@@ -72,6 +82,7 @@ namespace MEP_Tools.ThoatNuoc
                                 LocationCurve lc_nhanh = pipe_nhanh.Location as LocationCurve;
                                 XYZ stPoint_nhanh = lc_nhanh.Curve.GetEndPoint(0);
                                 XYZ edPoint_nhanh = lc_nhanh.Curve.GetEndPoint(1);
+                                ts.Commit();
 
                                 XYZ Intersec = F.CheckIntersec(stPoint_chinh, edPoint_chinh, F.GetIntersec1(stPoint_chinh, edPoint_chinh, Conn_Bottom_Nhanh, pipe_nhanh));
 
@@ -79,23 +90,7 @@ namespace MEP_Tools.ThoatNuoc
                                 {
                                     if (Conn_Bottom_Nhanh.Origin.Z > Intersec.Z)
                                     {
-                                        //double diameter = pipe_nhanh.Diameter * 1.2;
-                                        //XYZ diem11 = new XYZ(Conn_Bottom_Nhanh.Origin.X, Conn_Bottom_Nhanh.Origin.Y, 0);
-                                        //XYZ diem22 = new XYZ(Intersec.X, Intersec.Y, 0);
-                                        //double kc0 = diem11.DistanceTo(diem22);
-                                        //double kc_keolaigan = kc0 - diameter;
-                                        //XYZ u_keolaigan = null;
-                                        //if ((stPoint_nhanh - edPoint_nhanh).Normalize().Z < 0)
-                                        //{
-                                        //    u_keolaigan = stPoint_nhanh - edPoint_nhanh;
-                                        //}
-                                        //else
-                                        //{
-                                        //    u_keolaigan = - stPoint_nhanh + edPoint_nhanh;
-                                        //}
-
-                                        //Conn_Bottom_Nhanh.Origin = Conn_Bottom_Nhanh.Origin + kc_keolaigan * u_keolaigan.Normalize();
-
+                                        ts.Start();
 
                                         XYZ diem11 = new XYZ(Conn_Bottom_Nhanh.Origin.X, Conn_Bottom_Nhanh.Origin.Y, 0);
                                         XYZ diem22 = new XYZ(Intersec.X, Intersec.Y, 0);
@@ -160,22 +155,24 @@ namespace MEP_Tools.ThoatNuoc
                                             Connector Conn_p_new_Top = F.GetConnectorDifferentPoint(p_new, Conn_p_new_Intersec.Origin);
                                             F.Case9(pipe_chinh, stPoint_chinh, edPoint_chinh, Intersec_along, distance, _pipeSystemType_1, _pipeType_1.Id, _levelId_1, p_new, Conn_p_new_Intersec, Conn_p_new_Top, Conn_Bottom_along);
                                         }
+                                        ts.Commit();
+
 
                                     }
                                 }
-                                SingleData.Singleton.Instance.RevitData.Transaction.Commit();
                                 if (cls_ThoatNuoc.Id_Tee9 != null)
                                 {
-
-                                    SingleData.Singleton.Instance.RevitData.Transaction.Start();
+                                    ts.Start();
                                     ElementTransformUtils.MoveElement(SingleData.Singleton.Instance.RevitData.Document, cls_ThoatNuoc.Id_Tee9, new XYZ(0.001 / 304.8, 0.001 / 304.8, 0));
-                                    SingleData.Singleton.Instance.RevitData.Transaction.Commit();
+                                    ts.Commit();
                                 }
+                                tsg.Assimilate();
                             }
                         }
                         catch (Exception ex)
                         {
-                            SingleData.Singleton.Instance.RevitData.Transaction.RollBack();
+                            if (ts.HasStarted()) ts.RollBack();
+                            if (tsg.HasStarted()) tsg.RollBack();
                             System.Windows.MessageBox.Show(ex.Message + "\n" + "Contact: " + cls_Contact.sdt + " or Email: " + cls_Contact.email);
                             return;
                         }

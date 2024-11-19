@@ -14,6 +14,8 @@ namespace MEP_Tools
         private Document document;
         private Selection selection;
         private Transaction transaction;
+        private TransactionGroup transactiongroup;
+
         public UIApplication UIApplication
         {
             get;
@@ -57,6 +59,14 @@ namespace MEP_Tools
             {
                 if (transaction == null) transaction = new Transaction(Document, "Add-in");
                 return transaction;
+            }
+        }
+        public TransactionGroup TransactionGroup
+        {
+            get
+            {
+                if (transactiongroup == null) transactiongroup = new TransactionGroup(Document);
+                return transactiongroup;
             }
         }
         public Transaction Transaction_Sup

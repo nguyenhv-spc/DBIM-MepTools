@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Input;
+using System.Windows.Interop;
 using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
@@ -16,10 +17,18 @@ namespace MEP_Tools.ThoatNuoc
     [Transaction(TransactionMode.Manual)]
     public class Command_Drainage7 : WPFData, IExternalCommand
     {
+        Document _doc;
+        Transaction ts = null;
+        TransactionGroup tsg = null;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             SingleData.Singleton.Instance = new SingleData.Singleton();
             SingleData.Singleton.Instance.RevitData.UIApplication = commandData.Application;
+
+            tsg = SingleData.Singleton.Instance.RevitData.TransactionGroup;
+            ts = SingleData.Singleton.Instance.RevitData.Transaction;
+            _doc = SingleData.Singleton.Instance.RevitData.Document;
+
             if (cls_Reg.Login == "Login")
             {
                 if (cls_Reg.value_slope != "")
@@ -58,18 +67,19 @@ namespace MEP_Tools.ThoatNuoc
                         {
                             if (r_chinh != null)
                             {
+                                tsg.Start(" MepTools ");
                                 List<Reference> list_r = new List<Reference>();
                                 List<XYZ> list_point = new List<XYZ>();
                                 List<double> list_kc = new List<double>();
                                 foreach (Reference item in r_nhanh)
                                 {
-                                    Pipe pipe_nhanh_sx = SingleData.Singleton.Instance.RevitData.Document.GetElement(item) as Pipe;
+                                    Pipe pipe_nhanh_sx = _doc.GetElement(item) as Pipe;
                                     Connector Conn_Bottom_sx = F.GetConnector(pipe_nhanh_sx);
                                     list_point.Add(Conn_Bottom_sx.Origin);
                                     list_r.Add(item);
                                 }
 
-                                Pipe pipe_chinh_sx = SingleData.Singleton.Instance.RevitData.Document.GetElement(r_chinh) as Pipe;
+                                Pipe pipe_chinh_sx = _doc.GetElement(r_chinh) as Pipe;
                                 Connector Conn_main = F.GetConnector(pipe_chinh_sx);
                                 XYZ main = Conn_main.Origin;
                                 foreach (var item in list_point)
@@ -94,12 +104,12 @@ namespace MEP_Tools.ThoatNuoc
                                 }
                                 for (i = 0; i < list_r.Count; i++)
                                 {
-                                    SingleData.Singleton.Instance.RevitData.Transaction.Start();
-                                    Pipe pipe_nhanh = SingleData.Singleton.Instance.RevitData.Document.GetElement(list_r[i]) as Pipe;
+                                    ts.Start();
+                                    Pipe pipe_nhanh = _doc.GetElement(list_r[i]) as Pipe;
                                     Connector Conn_Bottom = F.GetConnector(pipe_nhanh);
                                     if (cls_ThoatNuoc.Id_pipe_new_1 != null && cls_ThoatNuoc.Id_pipe_new_2 != null)
                                     {
-                                        Pipe pipe_chinh_1 = SingleData.Singleton.Instance.RevitData.Document.GetElement(cls_ThoatNuoc.Id_pipe_new_1) as Pipe;
+                                        Pipe pipe_chinh_1 = _doc.GetElement(cls_ThoatNuoc.Id_pipe_new_1) as Pipe;
 
                                         ElementId _levelId_1 = pipe_chinh_1.ReferenceLevel.Id;
                                         PipeType _pipeType_1 = pipe_chinh_1.PipeType;
@@ -128,7 +138,7 @@ namespace MEP_Tools.ThoatNuoc
                                         }
                                         else
                                         {
-                                            Pipe pipe_chinh_2 = SingleData.Singleton.Instance.RevitData.Document.GetElement(cls_ThoatNuoc.Id_pipe_new_2) as Pipe;
+                                            Pipe pipe_chinh_2 = _doc.GetElement(cls_ThoatNuoc.Id_pipe_new_2) as Pipe;
 
                                             ElementId _levelId_2 = pipe_chinh_2.ReferenceLevel.Id;
                                             PipeType _pipeType_2 = pipe_chinh_2.PipeType;
@@ -161,7 +171,7 @@ namespace MEP_Tools.ThoatNuoc
                                     else
                                     {
 
-                                        Pipe pipe_chinh = SingleData.Singleton.Instance.RevitData.Document.GetElement(r_chinh) as Pipe;
+                                        Pipe pipe_chinh = _doc.GetElement(r_chinh) as Pipe;
 
                                         ElementId _levelId = pipe_chinh.ReferenceLevel.Id;
                                         PipeType _pipeType = pipe_chinh.PipeType;
@@ -189,10 +199,10 @@ namespace MEP_Tools.ThoatNuoc
                                         }
                                         
                                     }
-                                    SingleData.Singleton.Instance.RevitData.Transaction.Commit();
+                                    ts.Commit();
                                     #region 'Tao check'
-                                    SingleData.Singleton.Instance.RevitData.Transaction.Start();
-                                    Pipe p_check = SingleData.Singleton.Instance.RevitData.Document.GetElement(cls_ThoatNuoc.Id_pipe_new_case7) as Pipe;
+                                    ts.Start();
+                                    Pipe p_check = _doc.GetElement(cls_ThoatNuoc.Id_pipe_new_case7) as Pipe;
                                     List<Connector> list_connector = F.GetConnectors(p_check);
                                     Connector Conn_Check = null;
                                     if (list_connector[0].Origin.DistanceTo(Conn_Bottom.Origin) < list_connector[1].Origin.DistanceTo(Conn_Bottom.Origin))
@@ -218,18 +228,18 @@ namespace MEP_Tools.ThoatNuoc
                                     {
                                         axis = -new XYZ(0, 0, 1);
                                     }
-                                    ElementTransformUtils.MoveElement(SingleData.Singleton.Instance.RevitData.Document, pipe_nhanh.Id, kc_Move * axis);
-                                    FamilyInstance Fitting0 = SingleData.Singleton.Instance.RevitData.Document.Create.NewElbowFitting(Conn_Check, Conn_Bottom);
-                                    SingleData.Singleton.Instance.RevitData.Transaction.Commit();
+                                    ElementTransformUtils.MoveElement(_doc, pipe_nhanh.Id, kc_Move * axis);
+                                    FamilyInstance Fitting0 = _doc.Create.NewElbowFitting(Conn_Check, Conn_Bottom);
+                                    ts.Commit();
                                     #endregion
                                 }
                                 if (cls_ThoatNuoc.list_Id_Tee7.Count > 0)
                                 {
                                     foreach (var item in cls_ThoatNuoc.list_Id_Tee7)
                                     {
-                                        SingleData.Singleton.Instance.RevitData.Transaction.Start();
-                                        ElementTransformUtils.MoveElement(SingleData.Singleton.Instance.RevitData.Document, item, new XYZ(0.001 / 304.8, 0.001 / 304.8, 0));
-                                        SingleData.Singleton.Instance.RevitData.Transaction.Commit();
+                                        ts.Start();
+                                        ElementTransformUtils.MoveElement(_doc, item, new XYZ(0.001 / 304.8, 0.001 / 304.8, 0));
+                                        ts.Commit();
                                     }
 
                                 }
@@ -242,10 +252,13 @@ namespace MEP_Tools.ThoatNuoc
                                     }
                                     System.Windows.Forms.MessageBox.Show("Does not apply to pipes with id: " + "\n" + nd);
                                 }
+                                tsg.Assimilate();
                             }
                         }
                         catch (Exception ex)
                         {
+                            if (ts.HasStarted()) ts.RollBack();
+                            if (tsg.HasStarted()) tsg.RollBack();
                             System.Windows.MessageBox.Show(ex.Message + "\n" + "Contact: " + cls_Contact.sdt + " or Email: " + cls_Contact.email);
                             return;
                         }

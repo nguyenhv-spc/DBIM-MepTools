@@ -97,6 +97,10 @@ namespace MEP_Tools.ThoatNuoc
             {
                 connector = list_Connector[1];
             }
+            else
+            {
+                connector = list_Connector[0];
+            }
             return connector;
         }
         public XYZ GetIntersec1(XYZ stPoint, XYZ edPoint, Connector Conn_Origin, Pipe p_nhanh)
